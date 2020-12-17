@@ -42,7 +42,7 @@ class Datum {
   String title;
   String imageUrl;
   Source source;
-  String sourceSpecificName;
+  String sourceSpecificName='';
   String currentChapter;
   String currentChapterUrl;
   AdditionalInfo additionalInfo;

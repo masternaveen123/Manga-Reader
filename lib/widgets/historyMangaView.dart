@@ -1,43 +1,32 @@
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mangareader/models/chapters.dart';
-import 'package:mangareader/models/manga.dart';
-import 'package:mangareader/models/searchQuery.dart';
 import 'package:mangareader/services/api_manager.dart';
-import 'package:mangareader/widgets/mangaReader.dart';
 
-class MangaView extends StatefulWidget {
-  Datum manga = null;
-  var source;
-  SearchQueryData query = null;
+import 'mangaReader.dart';
 
-  MangaView({this.manga, this.source, this.query});
+class HistoryMangaView extends StatefulWidget {
+  HistoryMangaView({this.v, this.index});
+  var v;
+  int index;
 
   @override
-  _MangaViewState createState() => _MangaViewState();
+  _HistoryMangaViewState createState() => _HistoryMangaViewState();
 }
 
-class _MangaViewState extends State<MangaView> {
+class _HistoryMangaViewState extends State<HistoryMangaView> {
   Future<Chapter> _chapters;
   @override
   void initState() {
-    print("^^");
-    print(widget.manga?.sourceSpecificName ?? widget.query?.sourceSpecificName);
-    print(">>");
     _chapters = APIChapters(
-      chapter:
-          widget.manga?.sourceSpecificName ?? widget.query?.sourceSpecificName,
-      source: widget.source,
+      source: widget.v[widget.index].source,
+      chapter: widget.v[widget.index].sourceSpecificName,
     ).getChapter();
+    // TODO: implement initState
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    print(widget.manga?.sourceSpecificName ?? widget.query?.sourceSpecificName);
-    print(widget.source);
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
@@ -54,7 +43,7 @@ class _MangaViewState extends State<MangaView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.manga?.title ?? widget.query?.title,
+                widget.v[widget.index].currentTitle,
                 style: Theme.of(context).textTheme.bodyText1,
               ),
               SizedBox(
@@ -66,7 +55,7 @@ class _MangaViewState extends State<MangaView> {
 //              crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.network(
-                    widget.manga?.imageUrl ?? widget.query?.imageUrl,
+                    widget.v[widget.index].thumbnail,
 //                    filterQuality: FilterQuality.high,
                     height: 200,
                     width: 150,
@@ -75,18 +64,6 @@ class _MangaViewState extends State<MangaView> {
                   SizedBox(
                     width: 10,
                   ),
-                  // Column(
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //   children: [
-                  //     Text(
-                  //       'Author : ${widget.manga?.additionalInfo.author}' ?? '',
-                  //       overflow: TextOverflow.ellipsis,
-                  //     ),
-                  //     Text('Rating : ${widget.manga.additionalInfo.rating}' ??
-                  //         ''),
-                  //   ],
-                  // ),
                 ],
               ),
               SizedBox(
@@ -109,45 +86,38 @@ class _MangaViewState extends State<MangaView> {
                       ),
                       itemBuilder: (context, index) {
                         var chapter = snapshot.data.data[index];
+                        print(widget.v[widget.index].currentChapter);
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: RaisedButton(
-                            color: Theme.of(context).accentColor,
+                            color: widget.v[widget.index].currentChapter !=
+                                    chapter.chapterNumber
+                                ? Theme.of(context).accentColor
+                                : Colors.red,
                             visualDensity: VisualDensity.compact,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                             elevation: 0,
                             onPressed: () {
-                              print(chapter.link);
-                              print(widget.manga?.sourceSpecificName ??
-                                  widget.query?.sourceSpecificName);
+                              // print(chapter.link);
+                              // print(widget.v[index].sourceSpecificName);
 
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => MangaReader(
                                       link: chapter.link,
-                                      source: widget.source,
-                                      thumbnail: widget.manga?.imageUrl ??
-                                          widget.query?.imageUrl,
-                                      currentChapter: chapter.chapterNumber,
-                                      currentTitle: widget.manga?.title ??
-                                          widget.query?.title,
-                                      sourceSpecificName:
-                                          widget.manga?.sourceSpecificName ??
-                                              widget.query.sourceSpecificName,
+                                      source: widget.v[widget.index].source,
+                                      thumbnail:
+                                          widget.v[widget.index].thumbnail,
+                                      currentChapter:
+                                          widget.v[widget.index].currentChapter,
+                                      currentTitle:
+                                          widget.v[widget.index].currentTitle,
+                                      sourceSpecificName: widget
+                                          .v[widget.index].sourceSpecificName,
                                     ),
-                                    // builder: (context) => MangaReader(
-                                    //   link: chapter.link,
-                                    //   source: widget.source,
-                                    //   thumbnail: widget.manga.imageUrl,
-                                    //   currentChapter:
-                                    //       widget.manga.currentChapter,
-                                    //   currentTitle: widget.manga.title,
-                                    //   sourceSpecificName:
-                                    //       widget.manga.sourceSpecificName,
-                                    // ),
                                   ));
                             },
                             child: Text(
